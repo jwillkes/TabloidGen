@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Tabloide Abreu & Silva</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Montserrat',Arial,sans-serif;background:#f0f0f0;display:flex;height:100vh;overflow:hidden}
+#sidebar{width:210px;min-width:210px;background:#111;color:#fff;display:flex;flex-direction:column}
+.sb-logo{padding:20px 16px 14px;border-bottom:1px solid #222}
+.sb-logo h1{font-family:'Bebas Neue',sans-serif;font-size:18px;color:#F47B20;letter-spacing:2px}
+.sb-logo p{font-size:9px;color:#555;letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.sb-logo span{background:#FFFFFF;color:#fff;font-size:8px;font-weight:800;padding:2px 7px;border-radius:10px;display:inline-block;margin-top:5px}
+nav{padding:8px 0;flex:1}
+.nb{display:flex;align-items:center;gap:9px;padding:11px 16px;cursor:pointer;color:#666;font-size:12px;font-weight:600;border-left:3px solid transparent;transition:.15s;user-select:none}
+.nb:hover{color:#fff;background:#1a1a1a}
+.nb.on{color:#F47B20;border-left-color:#F47B20;background:#1a0d00;font-weight:800}
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.topbar{background:#fff;padding:10px 22px;border-bottom:1px solid #e5e5e5;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.topbar h2{font-size:16px;font-weight:800}
+.topbar h2 b{color:#F47B20}
+.pag{display:none;overflow-y:auto;padding:20px 22px;flex:1}
+.pag.on{display:block}
+.btn{padding:7px 14px;border:none;border-radius:7px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:.15s}
+.btn-o{background:#FFFFFF;color:#fff}.btn-o:hover{background:#D4600A}
+.btn-g{background:#eee;color:#555}.btn-g:hover{background:#ddd}
+.btn-r{background:#e53e3e;color:#fff}.btn-r:hover{background:#c53030}
+.btn-v{background:#2e7d32;color:#fff}.btn-v:hover{background:#1b5e20}
+.btn-sm{padding:4px 10px;font-size:11px}
+.panel{background:#fff;border-radius:10px;border:1px solid #e5e5e5;margin-bottom:12px}
+.ph{padding:11px 15px;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between}
+.ph h3{font-size:12px;font-weight:800}
+.pb{padding:13px 15px}
+.fg{margin-bottom:10px}
+.fg label{display:block;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:#888;margin-bottom:4px}
+.fg input{width:100%;padding:7px 10px;border:2px solid #e5e5e5;border-radius:6px;font-family:'Montserrat',sans-serif;font-size:12px;color:#111}
+.fg input:focus{outline:none;border-color:#F47B20}
+.dz{border:2px dashed #ffb97a;border-radius:10px;background:#fff8f0;padding:24px;text-align:center;cursor:pointer;transition:.2s;margin-bottom:12px}
+.dz:hover,.dz.over{background:#ffe8cc;border-color:#F47B20}
+.dz .di{font-size:28px;margin-bottom:7px}
+.dz h3{font-size:13px;font-weight:800;color:#D4600A}
+.dz p{font-size:10px;color:#aaa;margin-top:3px}
+.tbl{background:#fff;border-radius:10px;border:1px solid #e5e5e5;overflow:hidden}
+.th{display:grid;grid-template-columns:50px 1fr 80px 78px;padding:7px 12px;background:#f5f5f5;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#888;border-bottom:1px solid #eee}
+.tr{display:grid;grid-template-columns:50px 1fr 80px 78px;padding:6px 12px;border-bottom:1px solid #f0f0f0;align-items:center;font-size:11px}
+.tr:hover{background:#fff8f0}.tr:last-child{border:none}
+.thumb{width:40px;height:40px;border-radius:5px;overflow:hidden;border:1px solid #eee;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-size:12px}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.ct{font-size:10px;font-weight:700;background:#f5f5f5;padding:2px 5px;border-radius:3px}
+.bv{background:#e8f5e9;color:#2e7d32;font-size:9px;font-weight:800;padding:2px 6px;border-radius:10px;text-transform:uppercase}
+.empty-st{text-align:center;padding:32px;color:#ccc;font-size:12px;font-weight:700}
+.pw{margin-bottom:10px;display:none}
+.pw span{font-size:11px;font-weight:700;display:block;margin-bottom:3px}
+.pg{height:3px;background:#eee;border-radius:2px;overflow:hidden}
+.pgf{height:100%;background:#FFFFFF;border-radius:2px;transition:width .2s}
+.up{border:2px dashed #ddd;border-radius:7px;padding:10px;text-align:center;cursor:pointer;background:#f9f9f9;font-size:10px;color:#aaa;position:relative;transition:.14s}
+.up:hover{border-color:#F47B20;background:#fff8f0}
+.up input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.up-prev{width:100%;height:60px;object-fit:cover;border-radius:4px;margin-top:5px;display:none}
+.builder{display:grid;grid-template-columns:300px 1fr;gap:16px;align-items:start}
+.pbox{background:#fff;border-radius:10px;border:1px solid #e5e5e5;overflow:hidden;position:sticky;top:0}
+.ptop{padding:8px 12px;background:#f5f5f5;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:#888}
+.pscroll{overflow:auto;height:calc(100vh - 152px);background:#444;padding:10px;display:flex;justify-content:flex-start;align-items:flex-start}
+.sec-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid #eee}
+.sec-top h2{font-size:15px;font-weight:800}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.stat{background:#fff;border-radius:10px;border:1px solid #e5e5e5;padding:14px;position:relative;overflow:hidden}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:#F47B20}
+.stat .sl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:#888}
+.stat .sv{font-size:30px;font-family:'Bebas Neue',sans-serif;color:#111;line-height:1;margin:3px 0 2px}
+.stat .ss{font-size:10px;color:#888}
+.acoes{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
+.acao{background:#fff;border-radius:10px;border:1px solid #e5e5e5;padding:13px;cursor:pointer;display:flex;align-items:center;gap:9px;transition:.15s}
+.acao:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(244,123,32,.1);border-color:#F47B20}
+.acao .ai{width:36px;height:36px;background:#fff8f0;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.acao .at{font-size:12px;font-weight:800}
+.acao .ad{font-size:10px;color:#888;margin-top:1px}
+.stt{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:#888;margin-bottom:10px}
+.exp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:16px}
+.exp-card{background:#fff;border-radius:10px;border:1px solid #e5e5e5;padding:22px 16px;text-align:center;transition:.15s}
+.exp-card:hover{transform:translateY(-2px);box-shadow:0 5px 16px rgba(244,123,32,.1);border-color:#F47B20}
+.btn-col{padding:7px 4px;border:2px solid #ddd;border-radius:7px;background:#fff;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;cursor:pointer;transition:.15s;color:#666;width:100%}
+.btn-col:hover{border-color:#F47B20;color:#F47B20}
+.btn-col-on{border-color:#F47B20;background:#fff8f0;color:#F47B20}
+.exp-card .eico{font-size:36px;margin-bottom:9px}
+.exp-card h3{font-size:14px;font-weight:800;margin-bottom:4px}
+.exp-card p{font-size:11px;color:#888;line-height:1.5}
+.info-box{background:#e8f5e9;border:1px solid #a5d6a7;border-radius:8px;padding:10px 13px;margin-bottom:13px;font-size:11px;color:#1b5e20;font-weight:600;line-height:1.7}
+.warn-box{background:#fff3e0;border:1px solid #ffcc02;border-radius:8px;padding:9px 13px;font-size:11px;font-weight:700;color:#7b5800;margin-bottom:12px;display:none}
+.toast{position:fixed;bottom:18px;right:18px;background:#111;color:#fff;padding:9px 14px;border-radius:8px;font-size:12px;font-weight:600;z-index:9999;opacity:0;transform:translateY(36px);transition:all .25s;border-left:4px solid #F47B20;pointer-events:none;max-width:320px}
+.toast.on{opacity:1;transform:translateY(0)}.toast.ok{border-left-color:#48bb78}.toast.er{border-left-color:#e53e3e}
+#lov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9998;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:#fff;font-size:13px;font-weight:700}
+#lov.on{display:flex}
+.spin{width:44px;height:44px;border:4px solid rgba(255,255,255,.2);border-top-color:#F47B20;border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ============================================
+   TABLOIDE — 2480x3508px FIXO
+============================================ */
+#tabloide{
+  width:2480px; height:3508px;
+  min-width:2480px; max-width:2480px;
+  min-height:3508px; max-height:3508px;
+  overflow:hidden;
+  background:#FFFFFF;
+  font-family:'Montserrat',Arial,sans-serif;
+  transform-origin:top left;
+  flex-shrink:0;
+  display:flex;
+  flex-direction:column;
+}
+/* CABECALHO 740px — SÓ IMAGEM */
+#tcab{
+  width:2480px; height:740px;
+  min-height:740px; max-height:740px;
+  flex-shrink:0;
+  position:relative; overflow:hidden;
+  background:#222;
+}
+#tcab-img{
+  position:absolute; inset:0;
+  background-size:cover; background-position:center;
+  width:100%; height:100%;
+}
+.cab-placeholder{
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  flex-direction:column; gap:16px;
+}
+.cab-placeholder span{font-size:52px;opacity:.18}
+.cab-placeholder p{font-size:28px;font-weight:800;color:rgba(255,255,255,.25);letter-spacing:3px;text-transform:uppercase}
+
+/* ÁREA PRODUTOS — ocupa 2528px restantes */
+#tprods{
+  flex:1; min-height:0;
+  background:#FFFFFF;
+  overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+}
+/* GRADE DINAMICA — colunas/linhas definidas via JS */
+#tgrade{
+  width:100%; height:100%;
+  display:grid;
+  padding:4px 32px;
+  gap:2px;
+}
+/* CARD HORIZONTAL */
+.pc{
+  background:#fff;
+  border-radius:0;
+  box-shadow:none;
+  border:none;
+  display:flex; flex-direction:row;
+  overflow:hidden; min-height:0;
+}
+.pc-foto{
+  flex:0 0 44%;
+  background:#fff;
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+.pc-foto img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block;}
+.pc-foto .noimg{font-size:40px;color:#ddd}
+.pc-info{
+  flex:1; display:flex; flex-direction:column;
+  justify-content:center; padding:8px 12px;
+  overflow:hidden; min-width:0;
+}
+/* Nome com tamanho adaptável */
+.pc-nome{
+  font-weight:800 !important; color:#111;
+  line-height:1.2;
+  margin-bottom:4px;
+  overflow:hidden;
+  display:-webkit-box;
+  -webkit-line-clamp:3;
+  -webkit-box-orient:vertical;
+  word-break:break-word;
+  flex-shrink:0;
+}
+.pc-preco{
+  font-family:'Montserrat',sans-serif;
+  font-weight:900;
+  line-height:1; white-space:nowrap; color:#F47B20;
+}
+.pc-cifrao{font-size:38px;vertical-align:super}
+.pc-int{font-size:96px}
+.pc-dec{font-size:46px;vertical-align:super}
+.pc-cod{font-size:30px;color:#111;margin-bottom:4px;letter-spacing:1px;font-weight:700}
+.pc-vazio{background:transparent;min-height:0}
+
+/* RODAPÉ 240px — SÓ IMAGEM */
+#trod{
+  width:2480px; height:240px;
+  min-height:240px; max-height:240px;
+  flex-shrink:0;
+  position:relative; overflow:hidden;
+  background:#222;
+}
+#trod-img{
+  position:absolute; inset:0;
+  background-size:cover; background-position:center;
+  width:100%; height:100%;
+}
+.rod-placeholder{
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  gap:18px;
+}
+.rod-placeholder span{font-size:28px;opacity:.15}
+.rod-placeholder p{font-size:22px;font-weight:800;color:rgba(255,255,255,.2);letter-spacing:3px;text-transform:uppercase}
+</style>
+</head>
+<body>
+
+<aside id="sidebar">
+  <div class="sb-logo">
+    <h1>ABREU &amp; SILVA</h1>
+    <p>Ferramentas &amp; Materiais</p>
+    <span>&#9889; Gerador de Tabloide</span>
+  </div>
+  <nav>
+    <div class="nb on" data-p="dash">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </div>
+    <div class="nb" data-p="imgs">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      Banco de Imagens
+      <span id="badge-n" style="margin-left:auto"></span>
+    </div>
+    <div class="nb" data-p="criar">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Criar Tabloide
+    </div>
+    <div class="nb" data-p="exp">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Exportar PNG / PDF
+    </div>
+  </nav>
+</aside>
+
+<div id="main">
+  <div class="topbar">
+    <h2>Gerador de <b>Tabloide</b></h2>
+    <span id="dhoje" style="font-size:10px;color:#aaa"></span>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="pag-dash" class="pag on">
+    <div class="stats">
+      <div class="stat"><div class="sl">Imagens</div><div class="sv" id="si">0</div><div class="ss">cadastradas</div></div>
+      <div class="stat"><div class="sl">Produtos</div><div class="sv" id="sp">0</div><div class="ss">no tabloide</div></div>
+      <div class="stat"><div class="sl">Ultimo Tabloide</div><div class="sv" style="font-size:15px;margin-top:7px" id="sd">&#8212;</div><div class="ss" id="sn">nenhum criado</div></div>
+    </div>
+    <div class="stt">Acoes Rapidas</div>
+    <div class="acoes">
+      <div class="acao" onclick="ir('criar')"><div class="ai">&#9889;</div><div><div class="at">Criar Tabloide</div><div class="ad">Importe planilha e gere</div></div></div>
+      <div class="acao" onclick="ir('imgs')"><div class="ai">&#128193;</div><div><div class="at">Importar Imagens</div><div class="ad">Cadastre por codigo</div></div></div>
+      <div class="acao" onclick="ir('exp')"><div class="ai">&#128196;</div><div><div class="at">Exportar PNG / PDF</div><div class="ad">Download direto</div></div></div>
+      <div class="acao" onclick="limparTudo()"><div class="ai">&#128465;</div><div><div class="at">Limpar Dados</div><div class="ad">Remove tudo</div></div></div>
+    </div>
+    <div style="background:#fff8f0;border:1px solid #ffcc99;border-radius:9px;padding:11px 13px;font-size:11px;color:#7a3500;line-height:1.7">
+      <b>Especificacoes:</b> 2480x3508px fixo &nbsp;|&nbsp; Cabecalho: 740px (so imagem) &nbsp;|&nbsp;
+      Rodape: 240px (so imagem) &nbsp;|&nbsp; Grade 4x8 &nbsp;|&nbsp; Max 32 produtos &nbsp;|&nbsp; Cards horizontais
+    </div>
+  </div>
+
+  <!-- BANCO DE IMAGENS -->
+  <div id="pag-imgs" class="pag">
+    <div class="sec-top">
+      <h2>Banco de Imagens</h2>
+      <div style="display:flex;gap:6px;align-items:center">
+        <span id="total-i" style="background:#FFFFFF;color:#fff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:12px">0</span>
+        <button class="btn btn-r btn-sm" onclick="limparImagens()">Limpar tudo</button>
+      </div>
+    </div>
+    <div class="dz" id="dz" onclick="document.getElementById('fi').click()">
+      <input type="file" id="fi" multiple accept="image/*" style="display:none">
+      <div class="di">&#128193;</div>
+      <h3>Clique ou arraste imagens aqui</h3>
+      <p>Nome do arquivo = codigo &nbsp;|&nbsp; Ex: 78965412.jpg</p>
+    </div>
+    <div class="pw" id="pw"><span>Importando...</span><div class="pg"><div class="pgf" id="pgf" style="width:0%"></div></div></div>
+    <div class="tbl">
+      <div class="th"><span>Img</span><span>Codigo</span><span>Status</span><span>Acao</span></div>
+      <div id="tb"><div class="empty-st">Nenhuma imagem</div></div>
+    </div>
+  </div>
+
+  <!-- CRIAR -->
+  <div id="pag-criar" class="pag">
+    <div class="sec-top">
+      <h2>Criar Tabloide</h2>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-g btn-sm" onclick="ir('exp')">Exportar</button>
+        <button class="btn btn-o" onclick="gerarTabloide()">&#9889; Gerar</button>
+      </div>
+    </div>
+    <div class="builder">
+      <div>
+
+        <div class="panel">
+          <div class="ph"><h3>&#128202; Planilha de Produtos</h3><span style="font-size:9px;color:#aaa">max 32</span></div>
+          <div class="pb">
+            <div class="dz" style="padding:18px;margin-bottom:0" onclick="document.getElementById('fxls').click()">
+              <input type="file" id="fxls" accept=".xlsx,.xls,.csv" style="display:none">
+              <div class="di" style="font-size:22px">&#128203;</div>
+              <h3 style="font-size:12px">Excel / CSV</h3>
+              <p>Colunas: <b>Codigo, Nome, Preco</b></p>
+            </div>
+            <div id="xls-ok" style="display:none;margin-top:8px;align-items:center;justify-content:space-between">
+              <span style="font-size:11px;font-weight:700;color:#2e7d32">&#10003; <span id="xqtd">0</span> produtos</span>
+              <button class="btn btn-g btn-sm" onclick="limparPlanilha()">Limpar</button>
+            </div>
+            <details style="margin-top:9px">
+              <summary style="cursor:pointer;font-size:10px;color:#888;font-weight:700">Exemplo CSV</summary>
+              <pre style="margin-top:5px;background:#f5f5f5;padding:7px;border-radius:5px;font-size:9px;color:#555">Codigo,Nome,Preco
+78965412,Alicate Universal 8pol,24.90
+78965413,Trena 5m,19.90</pre>
+            </details>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="ph"><h3>&#9707; Produtos por Linha</h3><span id="max-prod-label" style="font-size:9px;color:#aaa">max 32</span></div>
+          <div class="pb">
+      +'<div style="width:100%;height:100%;display:grid;grid-template-columns:repeat('+cols+',1fr);grid-template-rows:repeat(8,1fr);padding:4px 32px;gap:2px;">'
+              <button class="btn-col" data-c="1" onclick="setNCols(1)">1 por linha</button>
+              <button class="btn-col btn-col-on" data-c="2" onclick="setNCols(2)">2 por linha</button>
+              <button class="btn-col" data-c="3" onclick="setNCols(3)">3 por linha</button>
+              <button class="btn-col" data-c="4" onclick="setNCols(4)">4 por linha</button>
+            </div>
+            <div id="col-info" style="font-size:10px;color:#888;background:#f5f5f5;border-radius:6px;padding:7px 10px;line-height:1.6">
+              <b>2 colunas × 8 linhas</b> — max <b>16</b> produtos por página
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="ph"><h3>&#128444; Cabecalho — Somente Imagem</h3><span style="font-size:9px;color:#aaa">740px</span></div>
+          <div class="pb">
+            <div style="font-size:10px;color:#888;margin-bottom:9px;line-height:1.5">Adicione uma imagem de banner para o cabecalho. A imagem preenchera toda a area de 2480x740px.</div>
+            <div class="up">
+              <input type="file" accept="image/*" id="cabfile">
+              <span id="cablbl">&#128247; Selecionar imagem do cabecalho</span>
+              <img id="cabprev" class="up-prev">
+            </div>
+            <button class="btn btn-r btn-sm" style="margin-top:7px;display:none" id="btn-rem-cab" onclick="removerCab()">Remover imagem</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="ph"><h3>&#127381; Cores dos Cards</h3></div>
+          <div class="pb">
+            <div class="fg"><label>Cor do Preco</label><input type="color" id="cprecor" value="#F47B20" style="width:100%;height:30px;border:none;cursor:pointer;border-radius:5px"></div>
+            <div class="fg"><label>Fundo dos Cards</label><input type="color" id="ccards" value="#FFFFFF" style="width:100%;height:30px;border:none;cursor:pointer;border-radius:5px"></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="ph"><h3>&#128204; Rodape — Somente Imagem</h3><span style="font-size:9px;color:#aaa">240px</span></div>
+          <div class="pb">
+            <div style="font-size:10px;color:#888;margin-bottom:9px;line-height:1.5">Adicione uma imagem de banner para o rodape. A imagem preenchera toda a area de 2480x240px.</div>
+            <div class="up">
+              <input type="file" accept="image/*" id="rodfile">
+              <span id="rodlbl">&#128247; Selecionar imagem do rodape</span>
+              <img id="rodprev" class="up-prev">
+            </div>
+            <button class="btn btn-r btn-sm" style="margin-top:7px;display:none" id="btn-rem-rod" onclick="removerRod()">Remover imagem</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- PREVIEW -->
+      <div class="pbox">
+        <div class="ptop">
+          <span>&#128065; PREVIA 2480x3508px</span>
+          <span id="etxt"></span>
+        </div>
+        <div class="pscroll" id="ps">
+          <div id="tabloide">
+            <div id="tcab">
+              <div id="tcab-img"></div>
+              <div class="cab-placeholder" id="cab-ph">
+                <span>&#128444;</span>
+                <p>Imagem do Cabecalho</p>
+              </div>
+            </div>
+            <div id="tprods">
+              <div id="tgrade">
+                <div style="grid-column:1/-1;grid-row:1/-1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;opacity:.5">
+                  <div style="font-size:48px">&#128203;</div>
+                  <div style="font-size:22px;font-weight:800;color:rgba(255,255,255,.85)">Importe uma planilha</div>
+                  <div style="font-size:16px;color:rgba(255,255,255,.5)">Max 32 produtos — 4 colunas x 8 linhas</div>
+                </div>
+              </div>
+            </div>
+            <div id="trod">
+              <div id="trod-img"></div>
+              <div class="rod-placeholder" id="rod-ph">
+                <span>&#128444;</span>
+                <p>Imagem do Rodape</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- EXPORTAR -->
+  <div id="pag-exp" class="pag">
+    <div class="sec-top"><h2>Exportar PNG / PDF</h2></div>
+    <div class="warn-box" id="av-warn">&#9888; Nenhum produto carregado. Va em Criar Tabloide primeiro.</div>
+    <div class="exp-grid">
+      <div class="exp-card">
+        <div class="eico">&#128444;</div>
+        <h3>Exportar PNG</h3>
+        <p>Imagem de alta qualidade<br>2480x3508px direto para download</p>
+        <button class="btn btn-o" style="margin-top:12px;width:100%;font-size:13px;padding:10px" id="btn-png">&#11015; Baixar PNG</button>
+      </div>
+      <div class="exp-card">
+        <div class="eico">&#128196;</div>
+        <h3>Exportar PDF</h3>
+        <p>Arquivo PDF de alta qualidade<br>pronto para impressao profissional</p>
+        <button class="btn btn-v" style="margin-top:12px;width:100%;font-size:13px;padding:10px" id="btn-pdf">&#11015; Baixar PDF</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="ph"><h3>Resumo</h3></div>
+      <div class="pb" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;text-align:center">
+        <div><div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#888">Produtos</div><div style="font-size:30px;font-family:'Bebas Neue';color:#F47B20" id="rp">0</div></div>
+        <div><div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#888">Com Foto</div><div style="font-size:30px;font-family:'Bebas Neue';color:#F47B20" id="rf">0</div></div>
+        <div><div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#888">Tamanho</div><div style="font-size:16px;font-family:'Bebas Neue';color:#F47B20;margin-top:6px">2480x3508</div></div>
+        <div><div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#888">Grade</div><div style="font-size:16px;font-family:'Bebas Neue';color:#F47B20;margin-top:6px">4 x 8</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="lov"><div class="spin"></div><span id="lov-t">Aguarde...</span></div>
+<div class="toast" id="T"></div>
+
+<script>
+// ==========================================================
+// ESTADO
+// ==========================================================
+var IMGS={}, PRODS=[], UDATA='', UTIT='';
+var CAB_IMG='', ROD_IMG=''; // base64 das imagens de cab/rod
+
+(function(){
+  try{IMGS=JSON.parse(localStorage.getItem('ti')||'{}');}catch(e){}
+  try{PRODS=JSON.parse(localStorage.getItem('tp')||'[]');}catch(e){}
+  UDATA=localStorage.getItem('td')||'';
+  UTIT=localStorage.getItem('tt')||'';
+  CAB_IMG=localStorage.getItem('tc')||'';
+  ROD_IMG=localStorage.getItem('tr')||'';
+  // Restaura imagens
+  if(CAB_IMG) aplicarCab(CAB_IMG);
+  if(ROD_IMG) aplicarRod(ROD_IMG);
+})();
+
+function salvar(){
+  try{localStorage.setItem('ti',JSON.stringify(IMGS));}catch(e){}
+  try{localStorage.setItem('tp',JSON.stringify(PRODS));}catch(e){}
+  if(UDATA) localStorage.setItem('td',UDATA);
+  if(UTIT)  localStorage.setItem('tt',UTIT);
+  if(CAB_IMG) try{localStorage.setItem('tc',CAB_IMG);}catch(e){}
+  if(ROD_IMG) try{localStorage.setItem('tr',ROD_IMG);}catch(e){}
+}
+
+// ==========================================================
+// NAV
+// ==========================================================
+function ir(p){
+  document.querySelectorAll('.nb').forEach(function(b){b.classList.remove('on');});
+  document.querySelectorAll('.pag').forEach(function(x){x.classList.remove('on');});
+  var nb=document.querySelector('.nb[data-p="'+p+'"]');
+  var pg=document.getElementById('pag-'+p);
+  if(nb) nb.classList.add('on');
+  if(pg) pg.classList.add('on');
+  if(p==='dash') updDash();
+  if(p==='imgs') rendTbl();
+  if(p==='exp')  updExp();
+  if(p==='criar') setTimeout(escala,100);
+}
+document.querySelectorAll('.nb').forEach(function(b){
+  b.addEventListener('click',function(){ir(b.getAttribute('data-p'));});
+});
+
+// ==========================================================
+// TOAST / LOADING
+// ==========================================================
+var TT;
+function toast(msg,tipo){
+  var el=document.getElementById('T');
+  el.textContent=msg; el.className='toast on '+(tipo||'');
+  clearTimeout(TT); TT=setTimeout(function(){el.className='toast';},3500);
+}
+function load(msg){document.getElementById('lov-t').textContent=msg||'Aguarde...';document.getElementById('lov').classList.add('on');}
+function done(){document.getElementById('lov').classList.remove('on');}
+
+// ==========================================================
+// DASHBOARD
+// ==========================================================
+function updDash(){
+  document.getElementById('si').textContent=Object.keys(IMGS).length;
+  document.getElementById('sp').textContent=PRODS.length;
+  document.getElementById('sd').textContent=UDATA||'-';
+  document.getElementById('sn').textContent=UTIT||'nenhum criado';
+  updBadge();
+}
+function updBadge(){
+  var n=Object.keys(IMGS).length;
+  document.getElementById('badge-n').innerHTML=n?'<span style="background:#FFFFFF;color:#fff;font-size:8px;font-weight:800;padding:1px 5px;border-radius:8px">'+n+'</span>':'';
+}
+
+// ==========================================================
+// IMAGENS PRODUTOS
+// ==========================================================
+var dz=document.getElementById('dz');
+dz.addEventListener('dragover',function(e){e.preventDefault();dz.classList.add('over');});
+dz.addEventListener('dragleave',function(){dz.classList.remove('over');});
+dz.addEventListener('drop',function(e){e.preventDefault();dz.classList.remove('over');importarImagens(e.dataTransfer.files);});
+document.getElementById('fi').addEventListener('change',function(){importarImagens(this.files);this.value='';});
+
+function lerURL(file){return new Promise(function(ok){var r=new FileReader();r.onload=function(){ok(r.result);};r.readAsDataURL(file);});}
+
+async function importarImagens(files){
+  var arr=Array.from(files).filter(function(f){return f.type.startsWith('image/');});
+  if(!arr.length){toast('Nenhuma imagem valida','er');return;}
+  var pw=document.getElementById('pw'),pf=document.getElementById('pgf');
+  pw.style.display='block';
+  for(var i=0;i<arr.length;i++){
+    IMGS[arr[i].name.replace(/\.[^.]+$/,'')]=await lerURL(arr[i]);
+    pf.style.width=Math.round((i+1)/arr.length*100)+'%';
+  }
+  salvar();pw.style.display='none';pf.style.width='0%';
+  rendTbl();updBadge();
+  toast(arr.length+' imagem(ns) importada(s)','ok');
+}
+function rendTbl(){
+  var tb=document.getElementById('tb'),codes=Object.keys(IMGS);
+  document.getElementById('total-i').textContent=codes.length+' imagens';
+  if(!codes.length){tb.innerHTML='<div class="empty-st">Nenhuma imagem</div>';return;}
+  tb.innerHTML=codes.map(function(c){
+    return '<div class="tr">'
+      +'<div class="thumb"><img src="'+IMGS[c]+'" alt="'+c+'"></div>'
+      +'<div><span class="ct">'+c+'</span></div>'
+      +'<div><span class="bv">Ativo</span></div>'
+      +'<div><button class="btn btn-g btn-sm" onclick="remImg(\''+c+'\')">&#215;</button></div>'
+      +'</div>';
+  }).join('');
+}
+function remImg(c){delete IMGS[c];salvar();rendTbl();updBadge();toast('Imagem removida');}
+function limparImagens(){if(!confirm('Remover todas as imagens?'))return;IMGS={};salvar();rendTbl();updBadge();toast('Banco limpo');}
+
+// ==========================================================
+// CABECALHO E RODAPE — só imagem
+// ==========================================================
+function aplicarCab(src){
+  CAB_IMG=src;
+  var el=document.getElementById('tcab-img');
+  el.style.backgroundImage='url('+src+')';
+  document.getElementById('cab-ph').style.display='none';
+  var pv=document.getElementById('cabprev');pv.src=src;pv.style.display='block';
+  document.getElementById('cablbl').textContent='Imagem carregada';
+  document.getElementById('btn-rem-cab').style.display='inline-block';
+}
+function removerCab(){
+  CAB_IMG='';localStorage.removeItem('tc');
+  document.getElementById('tcab-img').style.backgroundImage='';
+  document.getElementById('cab-ph').style.display='flex';
+  document.getElementById('cabprev').style.display='none';
+  document.getElementById('cablbl').textContent='Selecionar imagem do cabecalho';
+  document.getElementById('btn-rem-cab').style.display='none';
+  document.getElementById('cabfile').value='';
+}
+document.getElementById('cabfile').addEventListener('change',function(){
+  var f=this.files[0];if(!f)return;
+  var r=new FileReader();r.onload=function(e){aplicarCab(e.target.result);salvar();};r.readAsDataURL(f);
+});
+
+function aplicarRod(src){
+  ROD_IMG=src;
+  var el=document.getElementById('trod-img');
+  el.style.backgroundImage='url('+src+')';
+  document.getElementById('rod-ph').style.display='none';
+  var pv=document.getElementById('rodprev');pv.src=src;pv.style.display='block';
+  document.getElementById('rodlbl').textContent='Imagem carregada';
+  document.getElementById('btn-rem-rod').style.display='inline-block';
+}
+function removerRod(){
+  ROD_IMG='';localStorage.removeItem('tr');
+  document.getElementById('trod-img').style.backgroundImage='';
+  document.getElementById('rod-ph').style.display='flex';
+  document.getElementById('rodprev').style.display='none';
+  document.getElementById('rodlbl').textContent='Selecionar imagem do rodape';
+  document.getElementById('btn-rem-rod').style.display='none';
+  document.getElementById('rodfile').value='';
+}
+document.getElementById('rodfile').addEventListener('change',function(){
+  var f=this.files[0];if(!f)return;
+  var r=new FileReader();r.onload=function(e){aplicarRod(e.target.result);salvar();};r.readAsDataURL(f);
+});
+
+// ==========================================================
+// PLANILHA
+// ==========================================================
+document.getElementById('fxls').addEventListener('change',function(){
+  var file=this.files[0];if(!file)return;
+  var ext=file.name.split('.').pop().toLowerCase();
+  load('Lendo planilha...');
+  var r=new FileReader();
+  r.onload=function(e){
+    try{
+      var prods=[];
+      if(ext==='csv'){
+        prods=lerCSV(e.target.result);
+      } else {
+        var wb=XLSX.read(e.target.result,{type:'binary'});
+        var ws=wb.Sheets[wb.SheetNames[0]];
+        XLSX.utils.sheet_to_json(ws,{defval:''}).forEach(function(row){
+          var c=String(row['Codigo']||row['codigo']||row['CODIGO']||'').trim();
+          var n=String(row['Nome']||row['nome']||row['NOME']||'').trim();
+          var p=String(row['Preco']||row['preco']||row['PRECO']||'').trim();
+          if(c&&n) prods.push({codigo:c,nome:n,preco:p});
+        });
+      }
+      if(!prods.length){done();toast('Colunas nao encontradas: Codigo, Nome, Preco','er');return;}
+      if(prods.length>32){
+        toast('Limite 32 produtos. Os primeiros 32 foram usados.','er');
+        prods=prods.slice(0,32);
+      }
+      PRODS=prods;salvar();
+      document.getElementById('xqtd').textContent=prods.length;
+      document.getElementById('xls-ok').style.display='flex';
+      done();toast(prods.length+' produtos carregados!','ok');
+      gerarTabloide();
+    }catch(err){done();toast('Erro: '+err.message,'er');console.error(err);}
+  };
+  if(ext==='csv') r.readAsText(file,'UTF-8'); else r.readAsBinaryString(file);
+  this.value='';
+});
+function lerCSV(txt){
+  var linhas=txt.trim().split(/\r?\n/);if(linhas.length<2)return[];
+  var cols=linhas[0].split(',').map(function(h){return h.trim().replace(/"/g,'').toLowerCase();});
+  return linhas.slice(1).map(function(l){
+    var v=l.split(',').map(function(x){return x.trim().replace(/"/g,'');});
+    var o={};cols.forEach(function(h,j){o[h]=v[j]||'';});
+    return {codigo:o['codigo']||'',nome:o['nome']||'',preco:o['preco']||''};
+  }).filter(function(p){return p.codigo&&p.nome;});
+}
+function limparPlanilha(){
+  PRODS=[];salvar();
+  document.getElementById('xls-ok').style.display='none';
+  document.getElementById('fxls').value='';
+  gerarTabloide();
+}
+
+// ==========================================================
+// TAMANHO ADAPTAVEL DO NOME — diminui fonte se texto longo
+// ==========================================================
+function tamanhoNome(nome){
+  var n=nome.length;
+  if(n<=15) return '34px';
+  if(n<=25) return '28px';
+  if(n<=35) return '24px';
+  if(n<=50) return '20px';
+  return '17px';
+}
+
+// ==========================================================
+// NUMERO DE COLUNAS
+// ==========================================================
+var NCOLS = 2; // padrão: 2 colunas
+
+function setNCols(n){
+  NCOLS = n;
+  // atualizar botões
+  document.querySelectorAll('.btn-col').forEach(function(b){
+    b.classList.toggle('btn-col-on', parseInt(b.getAttribute('data-c'))===n);
+  });
+  // info
+  var linhas=8, maxP=n*linhas;
+  document.getElementById('col-info').innerHTML='<b>'+n+' coluna'+(n>1?'s':'')+' × '+linhas+' linhas</b> — max <b>'+maxP+'</b> produtos por página';
+  document.getElementById('max-prod-label').textContent='max '+maxP;
+  gerarTabloide();
+}
+
+// Tamanhos de fonte por número de colunas
+function fontesCols(ncols){
+  if(ncols===1) return {cifrao:'56px',inteiro:'148px',decimal:'68px',fotoPct:'46%'};
+  if(ncols===2) return {cifrao:'46px',inteiro:'120px',decimal:'56px',fotoPct:'45%'};
+  if(ncols===3) return {cifrao:'40px',inteiro:'100px',decimal:'48px',fotoPct:'44%'};
+  return              {cifrao:'38px',inteiro:'96px', decimal:'46px',fotoPct:'44%'};
+}
+
+function tamanhoNomeCols(nome, ncols){
+  var n=nome.length;
+  if(ncols===1){
+    if(n<=15) return '48px';
+    if(n<=25) return '40px';
+    if(n<=35) return '34px';
+    if(n<=50) return '28px';
+    return '22px';
+  }
+  if(ncols===2){
+    if(n<=15) return '38px';
+    if(n<=25) return '32px';
+    if(n<=35) return '27px';
+    if(n<=50) return '22px';
+    return '18px';
+  }
+  if(ncols===3){
+    if(n<=15) return '30px';
+    if(n<=25) return '26px';
+    if(n<=35) return '22px';
+    if(n<=50) return '18px';
+    return '15px';
+  }
+  // 4 colunas
+  if(n<=15) return '34px';
+  if(n<=25) return '28px';
+  if(n<=35) return '24px';
+  if(n<=50) return '20px';
+  return '17px';
+}
+
+// ==========================================================
+// GERAR TABLOIDE
+// ==========================================================
+function gerarTabloide(){
+  var grade=document.getElementById('tgrade');
+  var pCor=document.getElementById('cprecor').value;
+  var cCor=document.getElementById('ccards').value;
+  var cols=NCOLS, linhas=8, totalSlots=cols*linhas;
+  var fontes=fontesCols(cols);
+
+  // Aplica grid dinamico
+  grade.style.gridTemplateColumns='repeat('+cols+',1fr)';
+  grade.style.gridTemplateRows='repeat('+linhas+',1fr)';
+
+  if(!PRODS.length){
+    grade.innerHTML='<div style="grid-column:1/-1;grid-row:1/-1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;opacity:.5">'
+      +'<div style="font-size:48px">&#128203;</div>'
+      +'<div style="font-size:22px;font-weight:800;color:rgba(255,255,255,.85)">Importe uma planilha</div>'
+      +'<div style="font-size:16px;color:rgba(255,255,255,.5)">Max '+totalSlots+' produtos ('+cols+' col x 8 lin)</div>'
+      +'</div>';
+    updExp();return;
+  }
+
+  if(PRODS.length>totalSlots){
+    toast('Aviso: '+PRODS.length+' produtos mas apenas '+totalSlots+' slots. Aumente o numero de colunas.','er');
+  }
+
+  var html='';
+  for(var i=0;i<totalSlots;i++){
+    if(i<PRODS.length){
+      var p=PRODS[i];
+      var img=IMGS[p.codigo]||'';
+      var raw=parseFloat(String(p.preco).replace(',','.'))||0;
+      var pI=Math.floor(raw);
+      var pD=Math.round((raw-pI)*100).toString();
+      if(pD.length<2) pD='0'+pD;
+      var fs=tamanhoNomeCols(p.nome,cols);
+      var codFs=cols<=2?'24px':'18px';
+      html+='<div class="pc" style="background:'+cCor+';">'
+        +'<div class="pc-foto" style="flex:0 0 '+fontes.fotoPct+'">'+(img?'<img src="'+img+'" alt="" style="max-width:100%;max-height:100%;width:auto;height:auto;display:block;">':'<div class="noimg">&#128230;</div>')+'</div>'
+        +'<div class="pc-info">'
+          +'<div class="pc-nome" style="font-size:'+fs+'">'+p.nome+'</div>'
+          +'<div class="pc-cod" style="font-size:'+codFs+'">Cod: '+p.codigo+'</div>'
+          +'<div class="pc-preco" style="color:'+pCor+';">'
+            +'<span class="pc-cifrao" style="font-size:'+fontes.cifrao+'">R$</span>'
+            +'<span class="pc-int" style="font-size:'+fontes.inteiro+'">'+pI+'</span>'
+            +'<span class="pc-dec" style="font-size:'+fontes.decimal+'">,'+pD+'</span>'
+          +'</div>'
+        +'</div>'
+        +'</div>';
+    } else {
+      html+='<div class="pc-vazio"></div>';
+    }
+  }
+  grade.innerHTML=html;
+  UDATA=new Date().toLocaleDateString('pt-BR');
+  UTIT='Tabloide';
+  salvar();updExp();
+  toast(PRODS.length+' produto(s) no tabloide!','ok');
+}
+
+// Cores ao vivo
+document.getElementById('cprecor').addEventListener('input',function(){gerarTabloide();});
+document.getElementById('ccards').addEventListener('input',function(){gerarTabloide();});
+
+// ==========================================================
+// ESCALA PREVIEW
+// ==========================================================
+function escala(){
+  var tab=document.getElementById('tabloide'),ps=document.getElementById('ps');
+  if(!tab||!ps)return;
+  var s=(ps.clientWidth-20)/2480;
+  tab.style.transform='scale('+s+')';
+  tab.style.transformOrigin='top left';
+  tab.style.marginBottom=(3508*s-3508)+'px';
+  document.getElementById('etxt').textContent=Math.round(s*100)+'%';
+}
+window.addEventListener('resize',function(){if(document.getElementById('pag-criar').classList.contains('on'))escala();});
+
+// ==========================================================
+// RESUMO
+// ==========================================================
+function updExp(){
+  document.getElementById('rp').textContent=PRODS.length;
+  document.getElementById('rf').textContent=PRODS.filter(function(x){return!!IMGS[x.codigo];}).length;
+  var av=document.getElementById('av-warn');
+  if(av) av.style.display=PRODS.length?'none':'block';
+}
+
+// ==========================================================
+// EXPORTAR — captura com html2canvas em iframe isolado
+// ==========================================================
+function montarHTMLExport(){
+  var pCor=document.getElementById('cprecor').value;
+  var cCor=document.getElementById('ccards').value;
+  var cols=NCOLS, totalSlots=cols*8;
+  var fontes=fontesCols(cols);
+
+  // Cards
+  var cards='';
+  for(var i=0;i<totalSlots;i++){
+    if(i<PRODS.length){
+      var p=PRODS[i],imgSrc=IMGS[p.codigo]||'';
+      var raw=parseFloat(String(p.preco).replace(',','.'))||0;
+      var pI=Math.floor(raw);
+      var pD=Math.round((raw-pI)*100).toString();
+      if(pD.length<2) pD='0'+pD;
+      var fs=tamanhoNomeCols(p.nome,cols);
+      var codFs=cols<=2?'24px':'18px';
+      var fotoEl=imgSrc
+        ?'<img src="'+imgSrc+'" style="max-width:100%;max-height:100%;width:auto;height:auto;display:block;">'
+        :'<div style="font-size:40px;color:#ddd;display:flex;align-items:center;justify-content:center;width:100%;height:100%;">&#128230;</div>';
+      cards+='<div style="background:'+cCor+';border-radius:0;box-shadow:none;display:flex;overflow:hidden;min-height:0;">'
+        +'<div style="flex:0 0 '+fontes.fotoPct+';background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;">'+fotoEl+'</div>'
+        +'<div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:8px 12px;overflow:hidden;min-width:0;">'
+          +'<div style="font-size:'+fs+';font-weight:800;color:#111;line-height:1.2;margin-bottom:4px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;word-break:break-word;">'+p.nome+'</div>'
+          +'<div style="font-size:'+codFs+';color:#111;margin-bottom:4px;letter-spacing:1px;font-weight:700;font-family:Montserrat,Arial,sans-serif;">Cod: '+p.codigo+'</div>'
+          +'<div style="font-family:Montserrat,sans-serif;font-weight:900;line-height:1;white-space:nowrap;color:'+pCor+';">'
+            +'<span style="font-size:'+fontes.cifrao+';vertical-align:super;">R$</span>'
+            +'<span style="font-size:'+fontes.inteiro+';">'+pI+'</span>'
+            +'<span style="font-size:'+fontes.decimal+';vertical-align:super;">,'+pD+'</span>'
+          +'</div>'
+        +'</div>'
+        +'</div>';
+    } else {
+      cards+='<div style="background:transparent;min-height:0;"></div>';
+    }
+  }
+
+  var cabSection = CAB_IMG
+    ? '<div style="width:2480px;height:740px;min-height:740px;max-height:740px;flex-shrink:0;overflow:hidden;background:#222;">'
+      +'<img src="'+CAB_IMG+'" style="width:100%;height:100%;object-fit:cover;display:block;">'
+      +'</div>'
+    : '<div style="width:2480px;height:740px;min-height:740px;max-height:740px;flex-shrink:0;background:#222;display:flex;align-items:center;justify-content:center;">'
+      +'<span style="font-size:48px;opacity:.18">&#128444;</span>'
+      +'</div>';
+
+  var rodSection = ROD_IMG
+    ? '<div style="width:2480px;height:240px;min-height:240px;max-height:240px;flex-shrink:0;overflow:hidden;background:#222;">'
+      +'<img src="'+ROD_IMG+'" style="width:100%;height:100%;object-fit:cover;display:block;">'
+      +'</div>'
+    : '<div style="width:2480px;height:240px;min-height:240px;max-height:240px;flex-shrink:0;background:#222;">'
+      +'</div>';
+
+  return '<!DOCTYPE html><html><head><meta charset="UTF-8">'
+    +'<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">'
+    +'<style>'
+    +'*{box-sizing:border-box;margin:0;padding:0}'
+    +'body{width:2480px;height:3508px;overflow:hidden;background:#FFFFFF;font-family:Montserrat,Arial,sans-serif;display:flex;flex-direction:column;}'
+    +'@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}'
+    +'</style></head><body>'
+    +cabSection
+    +'<div style="flex:1;min-height:0;background:#FFFFFF;overflow:hidden;display:flex;align-items:center;justify-content:center;">'
+      +'<div style="width:100%;height:100%;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(8,1fr);padding:4px 32px;gap:2px;">'
+        +cards
+      +'</div>'
+    +'</div>'
+    +rodSection
+    +'</body></html>';
+}
+
+// Captura via iframe isolado — sem transforms, sem scroll
+async function capturar(){
+  return new Promise(function(resolve, reject){
+    var old=document.getElementById('__exp_iframe');
+    if(old) document.body.removeChild(old);
+
+    var iframe=document.createElement('iframe');
+    iframe.id='__exp_iframe';
+    iframe.style.cssText='position:fixed;left:-9999px;top:0;width:2480px;height:3508px;border:none;z-index:-999;opacity:0;pointer-events:none;';
+    document.body.appendChild(iframe);
+
+    iframe.srcdoc=montarHTMLExport();
+
+    iframe.onload=function(){
+      // aguarda fontes Google e imagens renderizarem
+      setTimeout(function(){
+        try{
+          var iDoc=iframe.contentDocument||iframe.contentWindow.document;
+          var iBody=iDoc.body;
+          html2canvas(iBody,{
+            scale:1,
+            useCORS:true,
+            allowTaint:true,
+            logging:false,
+            backgroundColor:'#FFFFFF',
+            width:2480,
+            height:3508,
+            windowWidth:2480,
+            windowHeight:3508
+          }).then(function(canvas){
+            try{document.body.removeChild(iframe);}catch(e){}
+            resolve(canvas);
+          }).catch(function(err){
+            try{document.body.removeChild(iframe);}catch(e){}
+            reject(err);
+          });
+        }catch(err){
+          try{document.body.removeChild(iframe);}catch(e){}
+          reject(err);
+        }
+      }, 2000);
+    };
+    iframe.onerror=function(e){
+      try{document.body.removeChild(iframe);}catch(e2){}
+      reject(new Error('iframe falhou'));
+    };
+  });
+}
+
+async function exportarPNG(){
+  if(!PRODS.length){toast('Gere o tabloide primeiro!','er');return;}
+  load('Gerando PNG... (pode levar alguns segundos)');
+  try{
+    var canvas=await capturar();
+    canvas.toBlob(function(blob){
+      var url=URL.createObjectURL(blob);
+      var a=document.createElement('a');
+      a.href=url; a.download='tabloide-'+Date.now()+'.png';
+      a.style.display='none';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},3000);
+      done();
+      toast('PNG baixado com sucesso!','ok');
+    },'image/png');
+  }catch(err){
+    done();toast('Erro PNG: '+err.message,'er');console.error(err);
+  }
+}
+
+async function exportarPDF(){
+  if(!PRODS.length){toast('Gere o tabloide primeiro!','er');return;}
+  load('Gerando PDF... (pode levar alguns segundos)');
+  try{
+    var canvas=await capturar();
+    var imgData=canvas.toDataURL('image/jpeg',0.95);
+    var W=canvas.width, H=canvas.height;
+    var pw=parseFloat((W*25.4/96).toFixed(1));
+    var ph=parseFloat((H*25.4/96).toFixed(1));
+    var Cls=(window.jspdf&&window.jspdf.jsPDF)?window.jspdf.jsPDF:window.jsPDF;
+    var doc=new Cls({orientation:'portrait',unit:'mm',format:[pw,ph]});
+    doc.addImage(imgData,'JPEG',0,0,pw,ph);
+    doc.save('tabloide-'+Date.now()+'.pdf');
+    done();
+    toast('PDF baixado com sucesso!','ok');
+  }catch(err){
+    done();toast('Erro PDF: '+err.message,'er');console.error(err);
+  }
+}
+
+document.getElementById('btn-png').addEventListener('click',exportarPNG);
+document.getElementById('btn-pdf').addEventListener('click',exportarPDF);
+
+// ==========================================================
+// LIMPAR
+// ==========================================================
+function limparTudo(){
+  if(!confirm('Apagar TODOS os dados?'))return;
+  IMGS={};PRODS=[];UDATA='';UTIT='';CAB_IMG='';ROD_IMG='';
+  ['ti','tp','td','tt','tc','tr'].forEach(function(k){localStorage.removeItem(k);});
+  removerCab();removerRod();updDash();
+  toast('Dados apagados','ok');
+}
+
+// ==========================================================
+// INIT
+// ==========================================================
+document.getElementById('dhoje').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+updDash();
+if(PRODS.length){
+  document.getElementById('xqtd').textContent=PRODS.length;
+  document.getElementById('xls-ok').style.display='flex';
+  gerarTabloide();
+}
+</script>
+</body>
+</html>
